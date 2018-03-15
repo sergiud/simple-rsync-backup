@@ -6,11 +6,10 @@ mostly used to backup data on Windows using Cygwin.
 ## Usage
 
 The script expects a `backup.conf` in its directory. The configuration file
-itself is a Bash script as well that stores the source directories for backup in
+itself is a Bash script as well and stores the source directories for backup in
 an array variable named `src`. The destination directory is specified by the
 variable `dst`. Additionally, one may provide the name of the file containing a
-list of excluded files which is passed to `rsync` using the `--exclude-from`
-parameter.
+list of excluded files passed to `rsync` using the `--exclude-from` parameter.
 
 A typical `backup.conf` looks as follows:
 
