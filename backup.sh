@@ -1,12 +1,20 @@
 #!/bin/bash
 
-[[ -f ./backup.conf ]] || \
-  { echo error: missing backup.conf >&2; exit 1; }
+# By default, assume ~/.srbrc. Use the SRBRC environment variable to override
+# the path.
+readonly conf=${SRBRC:-$HOME/.srbrc}
 
-source ./backup.conf
+[[ -f $conf ]] || \
+  { echo error: missing \"$conf\" >&2; exit 1; }
+
+source "$conf"
+
+# Backup folder name is constructed from the current data. Use the SRB_DATE_FMT
+# environment variable to override it.
+readonly date_fmt=${SRB_DATE_FMT:-+%Y-%m-%d %H_%M_%S}
 
 # The folder name of the current backup
-readonly FOLDER=$(date "+%Y-%m-%d %H_%M_%S")
+readonly FOLDER=$(date "$date_fmt")
 # The path to the current backup
 TARGET=$dst/$FOLDER
 readonly LOG_FILE="$dst/$FOLDER.log"
@@ -23,7 +31,7 @@ RSYNCCONFIG=(
   --info=progress2
   --delete-delay
   --delete-excluded
-  --chmod=ugo=rwX
+  #--chmod=u=rwX
   #--no-g
   #--no-p
   --stats
@@ -38,8 +46,14 @@ fi
 
 if [ -L "$LAST_ABORTED_TARGET" ]
 then
-  LAST_TARGET_RESOLVED=$(realpath -P "$LAST_TARGET")
-  LAST_TARGET_REAL=$(realpath -P "$LAST_ABORTED_TARGET")
+  LAST_TARGET_RESOLVED=$(readlink -f "$LAST_TARGET")
+  LAST_TARGET_REAL=$(readlink -f "$LAST_ABORTED_TARGET")
+
+  [[ -d $LAST_TARGET_REAL ]] || \
+      { echo error: previous backup in progress \"$LAST_TARGET_REAL\" does not \
+          exist >&2; \
+          echo note: either remove .aborted-backup or restore the symlink; exit 1; }
+
   # rsync failed: create a symlink to the last target
   echo "detected an earlier started backup"
   echo "resuming to backup from $LAST_TARGET_RESOLVED to $LAST_TARGET_REAL"
