@@ -90,8 +90,8 @@ else
   # be used as argument for --link-dest
   if [[ -d "$TARGET" ]]
   then
-  ( unlink "$LAST_TARGET" 2>/dev/null; exit 0 ) && \
-    ln -s "$TARGET" "$LAST_TARGET"
+      ( unlink "$LAST_TARGET" 2>/dev/null || true ) && \
+          ln -s "$TARGET" "$LAST_TARGET"
   fi
 
   # Since rsync finished successfully, remove the symlink to the last aborted
