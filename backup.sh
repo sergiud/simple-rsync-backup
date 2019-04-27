@@ -44,7 +44,7 @@ then
   RSYNCCONFIG+=(--exclude-from="$exclude")
 fi
 
-if [ -L "$LAST_ABORTED_TARGET" ]
+if [[ -L "$LAST_ABORTED_TARGET" ]]
 then
   LAST_TARGET_RESOLVED=$(readlink -f "$LAST_TARGET")
   LAST_TARGET_REAL=$(readlink -f "$LAST_ABORTED_TARGET")
@@ -68,9 +68,9 @@ fi
 # TODO unlink only if the TARGET exists (no dry-run)
 rsync "${RSYNCCONFIG[@]}" "${src[@]}" "$TARGET"
 
-if [ $? -ne 0 ]
+if [[ $? -ne 0 ]]
 then
-  if [ -L "$LAST_ABORTED_TARGET" ]
+  if [[ -L "$LAST_ABORTED_TARGET" ]]
   then
     unlink "$LAST_ABORTED_TARGET"
   fi
@@ -78,7 +78,7 @@ then
   # Do not remove .last-backup if exists
   ln -s "$TARGET" "$LAST_ABORTED_TARGET"
 
-  if [ $? -eq 0 ]
+  if [[ $? -eq 0 ]]
   then
     echo "backup aborted: you can resume the backup later"
   else
@@ -88,7 +88,7 @@ then
 else
   # In case rsync succeeded, create a symbolic link to the last target that will
   # be used as argument for --link-dest
-  if [ -d "$TARGET" ]
+  if [[ -d "$TARGET" ]]
   then
   ( unlink "$LAST_TARGET" 2>/dev/null; exit 0 ) && \
     ln -s "$TARGET" "$LAST_TARGET"
@@ -96,7 +96,7 @@ else
 
   # Since rsync finished successfully, remove the symlink to the last aborted
   # target.
-  if [ -L "$LAST_ABORTED_TARGET" ]
+  if [[ -L "$LAST_ABORTED_TARGET" ]]
   then
     unlink "$LAST_ABORTED_TARGET"
   fi
